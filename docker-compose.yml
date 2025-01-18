@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+
+  first:
+    build:
+      context: ./first
+      dockerfile: Dockerfile
+    depends_on:
+      - nats
+
+  second:
+    build:
+      context: ./second
+      dockerfile: Dockerfile
+    depends_on:
+      - nats
