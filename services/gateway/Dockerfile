@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Собираем приложение
-RUN CGO_ENABLED=0 GOOS=linux go build -o second_app .
+RUN CGO_ENABLED=0 GOOS=linux go build -o gateway ./cmd/
 
 # Используем образ Debian для запуска
 FROM debian:bullseye-slim
@@ -25,7 +25,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Копируем собранное приложение из предыдущего этапа
-COPY --from=builder /app/second_app /second_app
+COPY --from=builder /app/gateway /gateway
+
+COPY .env ./
 
 # Указываем команду для запуска
-ENTRYPOINT ["/second_app"]
+ENTRYPOINT ["/gateway"]

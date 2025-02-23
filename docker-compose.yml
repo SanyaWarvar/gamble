@@ -1,21 +1,41 @@
 version: '3.8'
 
 services:
+
   nats:
     image: nats:latest
     ports:
       - "4222:4222"
 
-  first:
-    build:
-      context: ./first
-      dockerfile: Dockerfile
-    depends_on:
-      - nats
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=qwerty
 
-  second:
+  gateway:
     build:
-      context: ./second
+      context: ./services/gateway
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - nats
+      - user_service
+    environment:
+      - NATSURL=nats://nats:4222
+    env_file:
+      - ./services/gateway/.env
+    restart: on-failure
+
+  user_service:
+    build:
+      context: ./services/user
       dockerfile: Dockerfile
     depends_on:
       - nats
+      - postgres
+    environment:
+      - NATSURL=nats://nats:4222
+    restart: on-failure

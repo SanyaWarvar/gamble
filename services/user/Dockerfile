@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Собираем приложение
-RUN CGO_ENABLED=0 GOOS=linux go build -o first_app .
+RUN CGO_ENABLED=0 GOOS=linux go build -o user_service ./cmd/
 
 # Используем образ Debian для запуска
 FROM debian:bullseye-slim
@@ -25,7 +25,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Копируем собранное приложение из предыдущего этапа
-COPY --from=builder /app/first_app /first_app
+COPY --from=builder /app/user_service /user_service
+
+COPY .env ./
 
 # Указываем команду для запуска
-ENTRYPOINT ["/first_app"]
+ENTRYPOINT ["/user_service"]
